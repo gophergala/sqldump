@@ -8,7 +8,6 @@ package main
  
 import ("fmt"
         "net/http"
-        "strings"
  	"database/sql"
       _ "github.com/go-sql-driver/mysql"
   	"os"
@@ -21,9 +20,6 @@ var host        = "localhost"
 var port        = "3306"
 var database	= "information_schema"
 
-func dsn (user string, pw string, db string) string{
-	return user + ":" + pw + "@tcp(" + host + ":" + port + ")/" + db 
-}
 
 func favicon(w http.ResponseWriter, r *http.Request) {
 	http.StatusText(404)
@@ -63,77 +59,6 @@ func home(w http.ResponseWriter, r *http.Request) {
          conn.Close()
 }
 
-func dumpdb(w http.ResponseWriter, r *http.Request, parray []string) {
-
-         database := parray[0]
-         conn, err := sql.Open("mysql", dsn(user, pw, database))
-         if err != nil {fmt.Println(err);os.Exit(1)}
- 
-         statement, err := conn.Prepare("show tables") 
-         if err != nil {fmt.Println(err);os.Exit(1)}
-
-         rows, err := statement.Query()
-         if err != nil {fmt.Println(err);os.Exit(1)}         
-
-	 fmt.Fprintln(w,rows)
-         for rows.Next() {
-                 var field string
-                 rows.Scan(&field)
-                 fmt.Fprintln(w, "TAB :", field) // scanner correct?
-         }
-         conn.Close()
-}
-
-func dumptable(w http.ResponseWriter, r *http.Request, parray []string) {
-
-         database := parray[0]
-         table	  := parray[1]
-
-         conn, err := sql.Open("mysql", dsn(user, pw, database))
-         if err != nil {fmt.Println(err);os.Exit(1)}
-         if err != nil {fmt.Println(err);os.Exit(1)}
- 
-         statement, err := conn.Prepare("select * from " + table) 
-         if err != nil {fmt.Println(err);os.Exit(1)}
-
-         rows, err := statement.Query()
-         if err != nil {fmt.Println(err);os.Exit(1)}         
-
-	 fmt.Fprintln(w,rows)
-         for rows.Next() {
-                 var field string
-                 rows.Scan(&field)
-                 fmt.Fprintln(w, "REC :", field)
-                 fmt.Fprintln(w, "REC :", field)
-         }
-         conn.Close()
-}
-
-func dumprecord(w http.ResponseWriter, r *http.Request, parray []string) {
- 
-         database := parray[0]
-         table	  := parray[1]
-         rec	  := parray[2]
-
-         conn, err := sql.Open("mysql", dsn(user, pw, database))
-         if err != nil {fmt.Println(err);os.Exit(1)}
- 
-         statement, err := conn.Prepare("select * from " + table + "limit " + rec + ",1") 
-         statement, err = conn.Prepare("show colums from " + table) 
-         if err != nil {fmt.Println(err);os.Exit(1)}
-
-         rows, err := statement.Query()
-         if err != nil {fmt.Println(err);os.Exit(1)}         
-
-	 fmt.Fprintln(w,rows)
-         for rows.Next() {
-                 var field string
-                 rows.Scan(&field)
-                 fmt.Fprintln(w, "F :", field)
-         }
-         conn.Close()
-}
-
 
 func main() {
     http.HandleFunc("/favicon.ico", favicon)
@@ -142,12 +67,4 @@ func main() {
     http.ListenAndServe(":8080", nil)
 }
 
-
-func url2array(r *http.Request) []string {
-    path := r.URL.Path
-    path = strings.TrimSpace(path)
-    if strings.HasPrefix(path, "/") {path = path[1:]}
-    if strings.HasSuffix(path, "/") {path = path[:len(path) - 1]}
-    return strings.Split(path, "/")
-}
 

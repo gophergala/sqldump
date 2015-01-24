@@ -2,7 +2,7 @@
 
 A small tool for administration of databases. Let's see how far it will grow the next 48 hours. 
 
-## install
+## prepare
 
 sudo mysqladmin --defaults-file=/etc/mysql/debian.cnf create gotestdb
 
@@ -18,10 +18,12 @@ mysql -p"mypassword" -u go_user gotestdb -e 'insert into posts values("end","201
 
 mysql -p"mypassword" -u go_user gotestdb -B -e 'select * from posts;'
 
+## install
+
 go get github.com/go-sql-driver/mysql
 
 ## run
 
 export GOPATH=~/bin/sqldump/
 
-go run sqldump.go 
+go run sqldump.go dump.go aux.go
