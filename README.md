@@ -1,7 +1,9 @@
 # sqldump
 
 A small tool for administration of databases. My first 48 hours in golang.
-It's just the backend. No fancy output.
+
+Unfortunately I do not have that much time, so it's just the backend with some basic html. 
+Use your fantasy and imagination for fancy output with latest js-technology. 
 
 ## prepare
 
@@ -22,7 +24,12 @@ It's just the backend. No fancy output.
     export GOPATH=~/bin/sqldump/
     go run sqldump.go dump.go aux.go
 
+## usage
+
+open http://localhost:8080/
+
 ## caveats
 
-- You can't access a database 'favicon.ico'
+- You can't access a database named 'favicon.ico'
 - Check for sql injection
+

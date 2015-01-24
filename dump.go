@@ -2,10 +2,8 @@ package main
 
 
 /* TODO
- * correct columns
  * turn into a generic functions
  * prevent sql injection
- * provide links
  * 
  */
 
@@ -155,7 +153,7 @@ func dumprecord(w http.ResponseWriter, r *http.Request, parray []string) {
 rowLoop:
 	for rows.Next() {
 		
-		// unfortunately we have to iterate over all rows
+		// unfortunately we have to iterate up to row of interest
 		if n == rec { 
 			err = rows.Scan(raw...)
 			checkY(err)
