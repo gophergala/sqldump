@@ -1,14 +1,14 @@
 package main
 
 import (
-	"net/http"
 	"fmt"
-	"strings"
+	"net/http"
 	"os"
+	"strings"
 )
 
 // simple error checker
-func checkY(err error){
+func checkY(err error) {
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -16,10 +16,10 @@ func checkY(err error){
 }
 
 // will create a link into one level deeper
-func linkDeeper (cwd string, link string, name string) string {
-    return "<a href=\"" + cwd + "/" + link + "\">" + name + "</a>"
+func linkDeeper(cwd string, link string, name string) string {
+	return "<a href=\"" + cwd + "/" + link + "\">" + name + "</a>"
 }
-    
+
 // Compose dataSourceName from components and globals
 func dsn(user string, pw string, db string) string {
 	return user + ":" + pw + "@tcp(" + host + ":" + port + ")/" + db

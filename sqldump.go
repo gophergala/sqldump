@@ -1,8 +1,3 @@
-/* TODO
- * login and sessions
- */
-
-
 package main
 
 import (
@@ -12,24 +7,24 @@ import (
 )
 
 var base_url = "http://localhost"
-var user = "go_user"
-var pw = "mypassword"
 var host = "localhost"
 var port = "3306"
 var database = "information_schema"
 
-func favicon(w http.ResponseWriter, r *http.Request) {
+func faviconHandler(w http.ResponseWriter, r *http.Request) {
 	http.StatusText(404)
 }
 
-func router(w http.ResponseWriter, r *http.Request) {
+func loginPageHandler(w http.ResponseWriter, request *http.Request) {
+	fmt.Fprintf(w, loginPage)
+}
+
+func pathHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Path == "/" {
 		home(w, r)
 	} else {
 		parray := url2array(r)
-
-//		fmt.Fprintln(w, parray)
 
 		switch len(parray) {
 		case 1:
@@ -42,10 +37,24 @@ func router(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	u, _ := getCredentials(r)
+
+	if u != "" {
+		fmt.Fprintln(w, "<h1>", u, "</h1>")
+		pathHandler(w, r)
+	} else {
+		loginPageHandler(w, r)
+	}
+}
 
 func main() {
-	http.HandleFunc("/favicon.ico", favicon)
-	http.HandleFunc("/", router)
+
+	http.HandleFunc("/favicon.ico", faviconHandler)
+	http.HandleFunc("/login", loginHandler)
+	http.HandleFunc("/logout", logoutHandler)
+	http.HandleFunc("/", indexHandler)
+
 	fmt.Println("Listening at localhost:8080")
 	http.ListenAndServe(":8080", nil)
 }
