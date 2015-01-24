@@ -20,7 +20,6 @@ Use your fantasy for best UX and choose high levels of abstraction and imaginati
     export GOPATH=$PWD
     git clone https://github.com/gophergala/sqldump .
     go get github.com/go-sql-driver/mysql
-    go get github.com/gorilla/mux
     go get github.com/gorilla/securecookie
 
 ## run
@@ -33,9 +32,9 @@ open http://localhost:8080/
 
 ## caveats
 
-- You can't access a database named 'favicon.ico'
+- A database named 'favicon.ico' can't be accessed
 - restriction on names of databases, tables, columns 
-- also check for sql injection via URI
+- basic protection against sql injection via URI
 
 ## perspectives
 

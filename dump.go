@@ -2,8 +2,6 @@ package main
 
 /* TODO
  * turn into generic functions
- * prevent sql injection
- *
  */
 
 import (
@@ -77,10 +75,10 @@ func dumptable(w http.ResponseWriter, r *http.Request, parray []string) {
 	checkY(err)
 	defer conn.Close()
 
-	statement, err := conn.Prepare("select * from " + table)
+	statement, err := conn.Prepare("select * from ?")
 	checkY(err)
 
-	rows, err := statement.Query()
+	rows, err := statement.Query(table)
 	checkY(err)
 	defer rows.Close()
 
@@ -130,10 +128,10 @@ func dumprecord(w http.ResponseWriter, r *http.Request, parray []string) {
 	checkY(err)
 	defer conn.Close()
 
-	statement, err := conn.Prepare("select * from " + table)
+	statement, err := conn.Prepare("select * from ?")
 	checkY(err)
 
-	rows, err := statement.Query()
+	rows, err := statement.Query(table)
 	checkY(err)
 	defer rows.Close()
 
