@@ -1,5 +1,4 @@
 /* TODO
- * column names
  * login and sessions
  */
 
@@ -7,12 +6,9 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"net/http"
-	"os"
-	"time"
 )
 
 var base_url = "http://localhost"
@@ -32,7 +28,8 @@ func router(w http.ResponseWriter, r *http.Request) {
 		home(w, r)
 	} else {
 		parray := url2array(r)
-		fmt.Fprintln(w, parray)
+
+//		fmt.Fprintln(w, parray)
 
 		switch len(parray) {
 		case 1:
@@ -45,32 +42,6 @@ func router(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func home(w http.ResponseWriter, r *http.Request) {
-	conn, err := sql.Open("mysql", dsn(user, pw, database))
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	statement, err := conn.Prepare("show databases")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	rows, err := statement.Query()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	for rows.Next() {
-		var field string
-		rows.Scan(&field)
-		fmt.Fprintln(w, "DB :", field)
-	}
-	conn.Close()
-}
 
 func main() {
 	http.HandleFunc("/favicon.ico", favicon)

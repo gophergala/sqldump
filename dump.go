@@ -12,42 +12,59 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
+	"strings"
 	_ "github.com/go-sql-driver/mysql"
 	"net/http"
-	"os"
 )
+
+
+// Shows selection of databases at top level 
+func home(w http.ResponseWriter, r *http.Request) {
+	conn, err := sql.Open("mysql", dsn(user, pw, database))
+	checkY(err)
+	defer conn.Close()
+
+	statement, err := conn.Prepare("show databases")
+	checkY(err)
+
+	rows, err := statement.Query()
+	checkY(err)
+	defer rows.Close()
+
+    var n int = 1
+	for rows.Next() {
+		var field string
+		rows.Scan(&field)
+		fmt.Fprint(w, linkDeeper("", field, "DB[" + strconv.Itoa(n) + "]"))
+		fmt.Fprintln(w, " ", field, "<br>")
+		n = n +1
+	}
+}
 
 //  Dump all tables of a database
 func dumpdb(w http.ResponseWriter, r *http.Request, parray []string) {
 
 	database := parray[0]
 	conn, err := sql.Open("mysql", dsn(user, pw, database))
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	checkY(err)
+	defer conn.Close()
 
 	statement, err := conn.Prepare("show tables")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	checkY(err)
 
 	rows, err := statement.Query()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	checkY(err)
+	defer rows.Close()
 
-	fmt.Fprintln(w, rows)
-	var n = 1
+	var n int = 1
 	for rows.Next() {
 		var field string
 		rows.Scan(&field)
-		fmt.Fprintln(w, n, field)
+		fmt.Fprint(w, linkDeeper(r.URL.Path, field, "T[" + strconv.Itoa(n) + "]"))
+		fmt.Fprintln(w,"  ", field,"<br>")
 		n = n + 1
 	}
-	conn.Close()
 }
 
 //  Dump all records of a table, one per line
@@ -56,103 +73,102 @@ func dumptable(w http.ResponseWriter, r *http.Request, parray []string) {
 	database := parray[0]
 	table := parray[1]
 
-	conn, err := sql.Open("mysql", dsn(user, pw, database))
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	conn, err := sql.Open("mysql", dsn(user, pw, database))	
+	checkY(err)
+	defer conn.Close()
+
 
 	statement, err := conn.Prepare("select * from " + table)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	checkY(err)
 
 	rows, err := statement.Query()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	checkY(err)
+	defer rows.Close()
+
+	cols, err := rows.Columns()
+	checkY(err)
+    fmt.Fprintln(w, "<p>" + "# " + strings.Join(cols," ") + "</p>")
+
+/*  credits: 
+ * 	http://stackoverflow.com/questions/19991541/dumping-mysql-tables-to-json-with-golang
+ * 	http://go-database-sql.org/varcols.html
+ */
+ 
+	raw := make([]interface{}, len(cols))
+	val := make([]interface{}, len(cols))
+
+	for i := range val {
+		raw[i] = &val[i]
 	}
 
-	fmt.Fprintln(w, rows)
-
-	var n = 1
+	var n int = 1
 	for rows.Next() {
-		var field string
-		rows.Scan(&field)
-		fmt.Fprintln(w, n, field)
+
+		fmt.Fprint(w, linkDeeper(r.URL.Path, strconv.Itoa(n), strconv.Itoa(n)))
+		err = rows.Scan(raw...)
+		checkY(err)
+
+		for _, col := range val {
+			if col != nil {
+				fmt.Fprintf(w, "%s ", string(col.([]byte)))
+			}
+		}
+		fmt.Fprintln(w,"<br>") 
+		n = n + 1
 	}
-	conn.Close()
 }
 
-// Shows selection of databases at top level 
-func home(w http.ResponseWriter, r *http.Request) {
-	conn, err := sql.Open("mysql", dsn(user, pw, database))
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	statement, err := conn.Prepare("show databases")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	rows, err := statement.Query()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	for rows.Next() {
-		var field string
-		rows.Scan(&field)
-		fmt.Fprintln(w, "DB :", field)
-	}
-	conn.Close()
-}
 
 
 
 // Dump all fields of a record, one column per line
 func dumprecord(w http.ResponseWriter, r *http.Request, parray []string) {
 
-	// http://go-database-sql.org/varcols.html
-
 	database := parray[0]
 	table := parray[1]
-	rec := parray[2]
+    rec, err := strconv.Atoi(parray[2])
+	checkY(err)
 
 	conn, err := sql.Open("mysql", dsn(user, pw, database))
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	checkY(err)
+	defer conn.Close()
 
-	statement, err := conn.Prepare("select * from " + table + "limit " + rec + ",1")
-	statement, err = conn.Prepare("show colums from " + table)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	statement, err := conn.Prepare("select * from " + table)
+	checkY(err)
 
 	rows, err := statement.Query()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	checkY(err)
+	defer rows.Close()
+	
+	columns, err := rows.Columns()
+	checkY(err)
+
+	raw := make([]interface{}, len(columns))
+	val := make([]interface{}, len(columns))
+
+	for i := range val {
+		raw[i] = &val[i]
 	}
 
-	fmt.Fprintln(w, rows)
-	var n = 1
+    var n int = 1
+
+rowLoop:
 	for rows.Next() {
-		var field string
-		rows.Scan(&field)
-		fmt.Fprintln(w, n, field)
-	}
-	conn.Close()
+		
+		// unfortunately we have to iterate over all rows
+		if n == rec { 
+			err = rows.Scan(raw...)
+			checkY(err)
+
+			fmt.Fprintln(w, "<p>")
+			for i, col := range val {
+				if col != nil {
+					fmt.Fprintln(w, columns[i], ":", string(col.([]byte)), "<br>")
+				}
+			}
+			fmt.Fprintln(w, "</p>")
+			break rowLoop		
+		}
+		n = n +1
+    }
 }

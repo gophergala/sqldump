@@ -1,6 +1,7 @@
 # sqldump
 
 A small tool for administration of databases. My first 48 hours in golang.
+It's just the backend. No fancy output.
 
 ## prepare
 
@@ -20,3 +21,8 @@ A small tool for administration of databases. My first 48 hours in golang.
 
     export GOPATH=~/bin/sqldump/
     go run sqldump.go dump.go aux.go
+
+## caveats
+
+- You can't access a database 'favicon.ico'
+- Check for sql injection
