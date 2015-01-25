@@ -1,6 +1,6 @@
 # sqldump
 
-A small tool for assisting in administration of databases. My first 48 hours in golang.
+A small tool for assisting in administration of databases. My first 48 hours in Golang.
 
 Unfortunately I do not have that much time, so it's just close to the backend with some basic html. 
 Use your fantasy for best UX and choose high levels of abstraction and imagination for fancy output with latest js-technology. 
@@ -28,7 +28,7 @@ Use your fantasy for best UX and choose high levels of abstraction and imaginati
 
 ## usage
 
-open http://localhost:8080/
+[http://localhost:8080](http://localhost:8080)
 
 ## caveats
 
