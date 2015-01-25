@@ -20,16 +20,20 @@ func loginPageHandler(w http.ResponseWriter, request *http.Request) {
 func pathHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Path == "/" {
+		fmt.Fprintln(w, "</p>")
 		home(w, r)
 	} else {
 		parray := url2array(r)
 
 		switch len(parray) {
 		case 1:
+			fmt.Fprintln(w, parray[0], "</p>")
 			dumpdb(w, r, parray)
 		case 2:
+			fmt.Fprintln(w, parray[0], "/", parray[1],"</p>")
 			dumptable(w, r, parray)
 		case 3:
+			fmt.Fprintln(w, parray[0], "/", parray[1], "/", parray[2],"</p>")
 			dumprecord(w, r, parray)
 		}
 	}
@@ -39,7 +43,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	user , _ , host , port := getCredentials(r)
 
 	if user != "" {
-		fmt.Fprintln(w, "<p>", user + "@" + host + ":" + port, "</p>")
+		fmt.Fprint(w, "<p>", linkDeeper(r.URL.Scheme + r.URL.Host, "exit", "[x]")," &nbsp; ", user + "@" + host + ":" + port, " &nbsp; ")
+		// TODO remove this ugly hack
 		pathHandler(w, r)
 	} else {
 		loginPageHandler(w, r)
@@ -50,7 +55,7 @@ func main() {
 
 	http.HandleFunc("/favicon.ico", faviconHandler)
 	http.HandleFunc("/login", loginHandler)
-	http.HandleFunc("/logout", logoutHandler)
+	http.HandleFunc("/exit", logoutHandler)
 	http.HandleFunc("/", indexHandler)
 
 	fmt.Println("Listening at localhost:8080")
