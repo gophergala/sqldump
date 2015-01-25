@@ -59,15 +59,17 @@ func dumpPath(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		q.Set("x", left)
 		linkleft := q.Encode()
-
 		q.Set("x", right)
 		linkright := q.Encode()
+		q.Del("x")
+		linkall := q.Encode()
 
 		fmt.Fprint(w, db+"."+t)
 		fmt.Fprint(w, " &nbsp; ")
 		fmt.Fprint(w, " ["+href("?"+linkleft, "<")+"] ")
 		fmt.Fprint(w, " ["+x+"] ")
 		fmt.Fprint(w, " ["+href("?"+linkright, ">")+"] ")
+		fmt.Fprint(w, " ["+href("?"+linkall, "#")+"] ")
 		fmt.Fprintln(w, "</p>")
 		fmt.Fprintln(w, tableA)
 		dumpFields(w, r, db, t, x)
