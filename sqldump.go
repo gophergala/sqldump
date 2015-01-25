@@ -22,17 +22,27 @@ func loginPageHandler(w http.ResponseWriter, r *http.Request) {
 func helpHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	// TODO help
-	fmt.Fprintf(w, "Best viewed with cli-browser >= 6.0")
+	fmt.Fprintf(w, "Best viewed with cli-browser >= 6.0\n")
+	fmt.Fprintf(w, "select links with mouse or finger\n")
 }
 
-// here is the workload
-
-func dumpPath(w http.ResponseWriter, r *http.Request) {
-
+func dumpIt(w http.ResponseWriter, r *http.Request) {
 	v := r.URL.Query()
 	db := v.Get("db")
 	t := v.Get("t")
 	x := v.Get("x")
+	user, _, host, port := getCredentials(r)
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	fmt.Fprint(w, "<p>")
+	fmt.Fprint(w, href("/logout", "[X]"))
+	fmt.Fprint(w, " &nbsp; ")
+	fmt.Fprint(w, href("/help", "[?]"))
+	fmt.Fprint(w, " &nbsp; ")
+	fmt.Fprint(w, href("/", "[/]"))
+	fmt.Fprint(w, " &nbsp; ")
+	fmt.Fprint(w, user+"@"+host+":"+port)
+	fmt.Fprint(w, " &nbsp; ")
 
 	if db == "" {
 		fmt.Fprintln(w, "</p>")
@@ -45,11 +55,11 @@ func dumpPath(w http.ResponseWriter, r *http.Request) {
 		dumpTables(w, r, db)
 		fmt.Fprint(w, tableO)
 	} else if x == "" {
-
 		q := r.URL.Query()
 		q.Add("action", "insert")
 		linkinsert := q.Encode()
-		q.Set("action", "select")
+		q.Del("action")
+		q.Add("action", "select")
 		linkselect := q.Encode()
 		q.Del("action")
 		q.Del("t")
@@ -66,11 +76,11 @@ func dumpPath(w http.ResponseWriter, r *http.Request) {
 		dumpRecords(w, r, db, t)
 		fmt.Fprint(w, tableO)
 	} else {
-
 		xint, err := strconv.Atoi(x)
 		checkY(err)
+		xmax, err := strconv.Atoi(getCount(r, db, t))
 		left := strconv.Itoa(maxI(xint-1, 1))
-		right := strconv.Itoa(xint + 1)
+		right := strconv.Itoa(minI(xint+1, xmax))
 
 		q := r.URL.Query()
 		q.Set("x", left)
@@ -94,25 +104,28 @@ func dumpPath(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
+func workload(w http.ResponseWriter, r *http.Request) {
 
+	v := r.URL.Query()
+	action := v.Get("action")
+	db := v.Get("db")
+	t := v.Get("t")
+
+	if action == "select" && db != "" && t != "" {
+		actionSelect(w, r, db, t)
+	} else if action == "insert" && db != "" && t != "" {
+		actionInsert(w, r, db, t)
+	} else {
+		dumpIt(w, r)
+	}
+}
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
 	pass := ""
 	user, _, host, port := getCredentials(r)
 
 	if user != "" {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-		// TODO remove this ugly hack starting a line here and ending it somewhere else
-		fmt.Fprint(w, "<p>")
-		fmt.Fprint(w, href("/logout", "[X]"))
-		fmt.Fprint(w, " &nbsp; ")
-		fmt.Fprint(w, href("/help", "[?]"))
-		fmt.Fprint(w, " &nbsp; ")
-		fmt.Fprint(w, href("/", "[/]"))
-		fmt.Fprint(w, " &nbsp; ")
-		fmt.Fprint(w, user+"@"+host+":"+port)
-		fmt.Fprint(w, " &nbsp; ")
-		dumpPath(w, r) // <- here is the workload
+		workload(w, r)
 	} else {
 		v := r.URL.Query()
 		user = v.Get("user")
