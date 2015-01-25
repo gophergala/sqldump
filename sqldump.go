@@ -27,7 +27,6 @@ func helpHandler(w http.ResponseWriter, r *http.Request) {
 
 // here is the workload
 
-
 func dumpPath(w http.ResponseWriter, r *http.Request) {
 
 	v := r.URL.Query()
@@ -52,10 +51,10 @@ func dumpPath(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, tableO)
 	} else {
 
-		xint, err  := strconv.Atoi(x)
+		xint, err := strconv.Atoi(x)
 		checkY(err)
-		left  := strconv.Itoa (maxI ( xint -1 , 1))
-		right := strconv.Itoa (xint +1) 
+		left := strconv.Itoa(maxI(xint-1, 1))
+		right := strconv.Itoa(xint + 1)
 
 		q := r.URL.Query()
 		q.Set("x", left)
@@ -66,9 +65,9 @@ func dumpPath(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Fprint(w, db+"."+t)
 		fmt.Fprint(w, " &nbsp; ")
-		fmt.Fprint(w, " [" + href("?" + linkleft,"<")   +"] ")
-		fmt.Fprint(w, " [" + x                     +"] ")
-		fmt.Fprint(w, " [" + href("?" + linkright,">") +"] ")
+		fmt.Fprint(w, " ["+href("?"+linkleft, "<")+"] ")
+		fmt.Fprint(w, " ["+x+"] ")
+		fmt.Fprint(w, " ["+href("?"+linkright, ">")+"] ")
 		fmt.Fprintln(w, "</p>")
 		fmt.Fprintln(w, tableA)
 		dumpFields(w, r, db, t, x)

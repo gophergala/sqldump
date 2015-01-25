@@ -22,9 +22,8 @@ func dsn(user string, pw string, host string, port string, db string) string {
 	return user + ":" + pw + "@tcp(" + host + ":" + port + ")/" + db
 }
 
-
-func maxI (a int, b int) int{
-	if a >=b {
+func maxI(a int, b int) int {
+	if a >= b {
 		return a
 	} else {
 		return b

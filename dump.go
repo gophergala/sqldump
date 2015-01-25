@@ -13,8 +13,6 @@ import (
 	"strconv"
 )
 
-
-
 // Shows selection of databases at top level
 func dumpHome(w http.ResponseWriter, r *http.Request) {
 
@@ -34,7 +32,7 @@ func dumpHome(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var field string
 		rows.Scan(&field)
-		tableDuo(w, href(r.URL.Host + "?" + "db=" + field, "["+strconv.Itoa(n)+"]"), field)
+		tableDuo(w, href(r.URL.Host+"?"+"db="+field, "["+strconv.Itoa(n)+"]"), field)
 		n = n + 1
 	}
 }
@@ -58,7 +56,7 @@ func dumpTables(w http.ResponseWriter, r *http.Request, database string) {
 	for rows.Next() {
 		var field string
 		rows.Scan(&field)
-		tableDuo(w, href(r.URL.Host + "?" + r.URL.RawQuery + "&t=" + field, "["+strconv.Itoa(n)+"]"), field)
+		tableDuo(w, href(r.URL.Host+"?"+r.URL.RawQuery+"&t="+field, "["+strconv.Itoa(n)+"]"), field)
 		n = n + 1
 	}
 }
@@ -82,7 +80,7 @@ func dumpRecords(w http.ResponseWriter, r *http.Request, database string, table 
 	cols, err := rows.Columns()
 	checkY(err)
 
-	{ 
+	{
 		// table head
 		fmt.Fprint(w, lineA)
 		tableHead(w, "#")
@@ -108,7 +106,7 @@ func dumpRecords(w http.ResponseWriter, r *http.Request, database string, table 
 	for rows.Next() {
 
 		fmt.Fprint(w, lineA)
-		tableCell(w, href(r.URL.Host + "?" + r.URL.RawQuery + "&x=" + strconv.Itoa(n), strconv.Itoa(n)))
+		tableCell(w, href(r.URL.Host+"?"+r.URL.RawQuery+"&x="+strconv.Itoa(n), strconv.Itoa(n)))
 
 		err = rows.Scan(raw...)
 		checkY(err)

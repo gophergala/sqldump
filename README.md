@@ -45,4 +45,6 @@ or more convenient but not safe
 - choice for different database drivers
 - insert and edit records
 
+# License
 
+MIT License
