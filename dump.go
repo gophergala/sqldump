@@ -13,8 +13,10 @@ import (
 	"strconv"
 )
 
+
+
 // Shows selection of databases at top level
-func home(w http.ResponseWriter, r *http.Request) {
+func dumpHome(w http.ResponseWriter, r *http.Request) {
 
 	user, pw, h, p := getCredentials(r)
 	conn, err := sql.Open("mysql", dsn(user, pw, h, p, database))
@@ -32,16 +34,15 @@ func home(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var field string
 		rows.Scan(&field)
-		tableDuo(w, href(r.URL.Host, field, "["+strconv.Itoa(n)+"]"), field)
+		tableDuo(w, href(r.URL.Host + "?" + "db=" + field, "["+strconv.Itoa(n)+"]"), field)
 		n = n + 1
 	}
 }
 
 //  Dump all tables of a database
-func dumpTables(w http.ResponseWriter, r *http.Request, parray []string) {
+func dumpTables(w http.ResponseWriter, r *http.Request, database string) {
 
 	user, pw, h, p := getCredentials(r)
-	database := parray[0]
 	conn, err := sql.Open("mysql", dsn(user, pw, h, p, database))
 	checkY(err)
 	defer conn.Close()
@@ -57,17 +58,15 @@ func dumpTables(w http.ResponseWriter, r *http.Request, parray []string) {
 	for rows.Next() {
 		var field string
 		rows.Scan(&field)
-		tableDuo(w, href(r.URL.Path, field, "["+strconv.Itoa(n)+"]"), field)
+		tableDuo(w, href(r.URL.Host + "?" + r.URL.RawQuery + "&t=" + field, "["+strconv.Itoa(n)+"]"), field)
 		n = n + 1
 	}
 }
 
 //  Dump all records of a table, one per line
-func dumpRecords(w http.ResponseWriter, r *http.Request, parray []string) {
+func dumpRecords(w http.ResponseWriter, r *http.Request, database string, table string) {
 
 	user, pw, h, p := getCredentials(r)
-	database := parray[0]
-	table := parray[1]
 
 	conn, err := sql.Open("mysql", dsn(user, pw, h, p, database))
 	checkY(err)
@@ -83,7 +82,8 @@ func dumpRecords(w http.ResponseWriter, r *http.Request, parray []string) {
 	cols, err := rows.Columns()
 	checkY(err)
 
-	{ // table head
+	{ 
+		// table head
 		fmt.Fprint(w, lineA)
 		tableHead(w, "#")
 		for _, col := range cols {
@@ -108,7 +108,7 @@ func dumpRecords(w http.ResponseWriter, r *http.Request, parray []string) {
 	for rows.Next() {
 
 		fmt.Fprint(w, lineA)
-		tableCell(w, href(r.URL.Path, strconv.Itoa(n), strconv.Itoa(n)))
+		tableCell(w, href(r.URL.Host + "?" + r.URL.RawQuery + "&n=" + strconv.Itoa(n), strconv.Itoa(n)))
 
 		err = rows.Scan(raw...)
 		checkY(err)
@@ -124,11 +124,9 @@ func dumpRecords(w http.ResponseWriter, r *http.Request, parray []string) {
 }
 
 // Dump all fields of a record, one column per line
-func dumpFields(w http.ResponseWriter, r *http.Request, parray []string) {
+func dumpFields(w http.ResponseWriter, r *http.Request, database string, table string, num string) {
 
-	database := parray[0]
-	table := parray[1]
-	rec, err := strconv.Atoi(parray[2])
+	rec, err := strconv.Atoi(num)
 	checkY(err)
 
 	user, pw, h, p := getCredentials(r)

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"net/http"
-	//	"net/url"
 )
 
 var base_url = "http://localhost"
@@ -25,62 +24,72 @@ func helpHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Best viewed with cli-browser >= 6.0")
 }
 
+// here is the workload
+
 func dumpPath(w http.ResponseWriter, r *http.Request) {
 
-	if r.URL.Path == "/" {
+	v := r.URL.Query()
+	db := v.Get("db")
+	t := v.Get("t")
+	n := v.Get("n")
+
+	if db == "" {
 		fmt.Fprintln(w, "</p>")
 		fmt.Fprint(w, tableA)
-		home(w, r)
+		dumpHome(w, r)
 		fmt.Fprint(w, tableO)
-	} else {
-		parray := url2array(r)
-
+	} else if t == "" {
+		fmt.Fprintln(w, db, "</p>")
 		fmt.Fprintln(w, tableA)
-		switch len(parray) {
-		case 1:
-			fmt.Fprintln(w, parray[0], "</p>")
-			dumpTables(w, r, parray)
-		case 2:
-			fmt.Fprintln(w, parray[0]+"."+parray[1], "</p>")
-			dumpRecords(w, r, parray)
-		case 3:
-			fmt.Fprintln(w, parray[0]+"."+parray[1], "["+parray[2]+"]</p>")
-			dumpFields(w, r, parray)
-		}
+		dumpTables(w, r, db)
+		fmt.Fprintln(w, tableO)
+	} else if n == "" {
+		fmt.Fprintln(w, db+"."+t, "</p>")
+		fmt.Fprintln(w, tableA)
+		dumpRecords(w, r, db, t)
+		fmt.Fprintln(w, tableO)
+	} else {
+		fmt.Fprintln(w, db+"."+t, "["+n+"]</p>")
+		fmt.Fprintln(w, tableA)
+		dumpFields(w, r, db, t, n)
 		fmt.Fprintln(w, tableO)
 	}
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 
+	pass := ""
 	user, _, host, port := getCredentials(r)
 
 	if user != "" {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
 		// TODO remove this ugly hack starting a line here and ending it somewhere else
-		fmt.Fprint(w, href(r.URL.Scheme+r.URL.Host, "logout", "[X]"))
+		fmt.Fprint(w, "<p>")
+		fmt.Fprint(w, href("/logout", "[X]"))
 		fmt.Fprint(w, " &nbsp; ")
-		fmt.Fprint(w, href(r.URL.Scheme+r.URL.Host, "help", "[?]"))
+		fmt.Fprint(w, href("/help", "[?]"))
 		fmt.Fprint(w, " &nbsp; ")
-		fmt.Fprint(w, href(r.URL.Scheme+r.URL.Host, "", "[/]"))
+		fmt.Fprint(w, href("/", "[/]"))
 		fmt.Fprint(w, " &nbsp; ")
 		fmt.Fprint(w, user+"@"+host+":"+port)
 		fmt.Fprint(w, " &nbsp; ")
-		dumpPath(w, r)
+		dumpPath(w, r) // <- here is the workload
 	} else {
 		v := r.URL.Query()
-		Quser := v.Get("user")
-		Qpass := v.Get("pass")
-		Qhost := v.Get("host")
-		Qport := v.Get("port")
-		if Quser != "" && Qpass != "" {
-			if Qhost == "" {
-				Qhost = "localhost"
+		user = v.Get("user")
+		pass = v.Get("pass")
+		host = v.Get("host")
+		port = v.Get("port")
+
+		if user != "" && pass != "" {
+			if host == "" {
+				host = "localhost"
 			}
-			if Qport == "" {
-				Qport = "3306"
+			if port == "" {
+				port = "3306"
 			}
-			setCredentials(w, Quser, Qpass, Qhost, Qport)
+			setCredentials(w, user, pass, host, port)
 			http.Redirect(w, r, r.URL.Host, 302)
 		} else {
 			loginPageHandler(w, r)

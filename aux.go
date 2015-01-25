@@ -15,9 +15,8 @@ func checkY(err error) {
 	}
 }
 
-// will create a link into one level deeper
-func href(cwd string, link string, name string) string {
-	return "<a href=\"" + cwd + "/" + link + "\">" + name + "</a>"
+func href(base string, name string) string {
+	return "<a href=\"" + base + "\">" + name + "</a>"
 }
 
 // Compose dataSourceName from components and globals

@@ -33,14 +33,12 @@ Use your fantasy for best UX and choose high levels of abstraction and imaginati
 
 or more convenient but not safe
 
-[http://localhost:8080/?user=galagopher&pass=mypassword&host=localhost&port=3306]
+[http://localhost:8080/?user=galagopher&pass=mypassword&host=localhost&port=3306](http://localhost:8080/?user=galagopher&pass=mypassword&host=localhost&port=3306)
+
 
 ## caveats
 
-- Database named 'favicon.ico' 'login' 'logout' 'help' can't be accessed
-- this stupid design in design has to be changed
-- restriction on names of databases, tables, columns 
-- only basic protection against sql injection
+- basic protection against sql injection only
 
 ## perspectives
 
