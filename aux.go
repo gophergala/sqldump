@@ -21,7 +21,7 @@ func linkDeeper(cwd string, link string, name string) string {
 }
 
 // Compose dataSourceName from components and globals
-func dsn(user string, pw string, db string) string {
+func dsn(user string, pw string, host string, port string, db string) string {
 	return user + ":" + pw + "@tcp(" + host + ":" + port + ")/" + db
 }
 

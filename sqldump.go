@@ -7,8 +7,6 @@ import (
 )
 
 var base_url = "http://localhost"
-var host = "localhost"
-var port = "3306"
 var database = "information_schema"
 
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,10 +36,10 @@ func pathHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	u, _ := getCredentials(r)
+	user , _ , host , port := getCredentials(r)
 
-	if u != "" {
-		fmt.Fprintln(w, "<h1>", u, "</h1>")
+	if user != "" {
+		fmt.Fprintln(w, "<p>", user + "@" + host + ":" + port, "</p>")
 		pathHandler(w, r)
 	} else {
 		loginPageHandler(w, r)

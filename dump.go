@@ -1,7 +1,7 @@
 package main
 
 /* TODO
- * turn into generic functions
+ * turn into more generic functions for printing into tables
  */
 
 import (
@@ -11,13 +11,14 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"text/template"
 )
 
 // Shows selection of databases at top level
 func home(w http.ResponseWriter, r *http.Request) {
 
-	user, pw := getCredentials(r)
-	conn, err := sql.Open("mysql", dsn(user, pw, database))
+	user, pw, h , p := getCredentials(r)
+	conn, err := sql.Open("mysql", dsn(user, pw, h, p, database))
 	checkY(err)
 	defer conn.Close()
 
@@ -41,9 +42,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 //  Dump all tables of a database
 func dumpdb(w http.ResponseWriter, r *http.Request, parray []string) {
 
-	user, pw := getCredentials(r)
+	user, pw, h, p := getCredentials(r)
 	database := parray[0]
-	conn, err := sql.Open("mysql", dsn(user, pw, database))
+	conn, err := sql.Open("mysql", dsn(user, pw, h, p, database))
 	checkY(err)
 	defer conn.Close()
 
@@ -67,18 +68,18 @@ func dumpdb(w http.ResponseWriter, r *http.Request, parray []string) {
 //  Dump all records of a table, one per line
 func dumptable(w http.ResponseWriter, r *http.Request, parray []string) {
 
-	user, pw := getCredentials(r)
+	user, pw, h, p := getCredentials(r)
 	database := parray[0]
 	table := parray[1]
 
-	conn, err := sql.Open("mysql", dsn(user, pw, database))
+	conn, err := sql.Open("mysql", dsn(user, pw, h, p, database))
 	checkY(err)
 	defer conn.Close()
 
-	statement, err := conn.Prepare("select * from ?")
+	statement, err := conn.Prepare("select * from " + template.HTMLEscapeString(table))
 	checkY(err)
 
-	rows, err := statement.Query(table)
+	rows, err := statement.Query()
 	checkY(err)
 	defer rows.Close()
 
@@ -123,15 +124,15 @@ func dumprecord(w http.ResponseWriter, r *http.Request, parray []string) {
 	rec, err := strconv.Atoi(parray[2])
 	checkY(err)
 
-	user, pw := getCredentials(r)
-	conn, err := sql.Open("mysql", dsn(user, pw, database))
+	user, pw, h, p := getCredentials(r)
+	conn, err := sql.Open("mysql", dsn(user, pw, h, p, database))
 	checkY(err)
 	defer conn.Close()
 
-	statement, err := conn.Prepare("select * from ?")
+	statement, err := conn.Prepare("select * from " + template.HTMLEscapeString(table))
 	checkY(err)
 
-	rows, err := statement.Query(table)
+	rows, err := statement.Query()
 	checkY(err)
 	defer rows.Close()
 
