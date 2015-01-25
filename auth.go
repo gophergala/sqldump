@@ -29,12 +29,12 @@ func getCredentials(request *http.Request) (userName string, password string, ho
 	return userName, password, host, port
 }
 
-func setCredentials( w http.ResponseWriter, userName string, pw string, host string, port string) {
+func setCredentials(w http.ResponseWriter, userName string, pw string, host string, port string) {
 	value := map[string]string{
 		"user":   userName,
 		"passwd": pw,
-		"host": host,
-		"port": port,
+		"host":   host,
+		"port":   port,
 	}
 	if encoded, err := cookieHandler.Encode("Datasource", value); err == nil {
 		cookie := &http.Cookie{
@@ -58,27 +58,25 @@ func clearCredentials(w http.ResponseWriter) {
 
 func loginHandler(w http.ResponseWriter, request *http.Request) {
 	user := request.FormValue("user")
-	pass := request.FormValue("password")
+	pass := request.FormValue("pass")
 	host := request.FormValue("host")
 	port := request.FormValue("port")
 	if user != "" && pass != "" {
 		setCredentials(w, user, pass, host, port)
 	}
-	http.Redirect(w, request, "/", 302)
+	http.Redirect(w, request, request.URL.Host, 302)
 }
 
 func logoutHandler(w http.ResponseWriter, request *http.Request) {
 	clearCredentials(w)
-	http.Redirect(w, request, "/", 302)
+	http.Redirect(w, request, request.URL.Host, 302)
 }
 
-const loginPage = `
-<h1>Login</h1>
-<form method="post" action="/login">
-   <label for="user">User name</label><input type="text" id="user" name="user"><br>
-   <label for="password">Password</label><input type="password" id="password" name="password"><br>
-   <label for="host">Host</label><input type="text" id="host" name="host" value="localhost"><br>
-   <label for="port">Port</label><input type="text" id="port" name="port" value="3306"><br>
+const loginPage = `<form method="post" action="/login">
+   <label for="user">User</label><input type="text"     id="user" name="user"><br>
+   <label for="pass">Pass</label><input type="password" id="pass" name="pass"><br>
+   <label for="host">Host</label><input type="text"     id="host" name="host" value="localhost"><br>
+   <label for="port">Port</label><input type="text"     id="port" name="port" value="3306"><br>
    <button type="submit">Login</button>
 </form>
 `

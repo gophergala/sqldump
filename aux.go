@@ -16,7 +16,7 @@ func checkY(err error) {
 }
 
 // will create a link into one level deeper
-func linkDeeper(cwd string, link string, name string) string {
+func href(cwd string, link string, name string) string {
 	return "<a href=\"" + cwd + "/" + link + "\">" + name + "</a>"
 }
 

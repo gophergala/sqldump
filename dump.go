@@ -8,16 +8,15 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"html/template"
 	"net/http"
 	"strconv"
-	"strings"
-	"text/template"
 )
 
 // Shows selection of databases at top level
 func home(w http.ResponseWriter, r *http.Request) {
 
-	user, pw, h , p := getCredentials(r)
+	user, pw, h, p := getCredentials(r)
 	conn, err := sql.Open("mysql", dsn(user, pw, h, p, database))
 	checkY(err)
 	defer conn.Close()
@@ -33,14 +32,13 @@ func home(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var field string
 		rows.Scan(&field)
-		fmt.Fprint(w, linkDeeper("", field, "DB["+strconv.Itoa(n)+"]"))
-		fmt.Fprintln(w, " ", field, "<br>")
+		tableDuo(w, href(r.URL.Host, field, "["+strconv.Itoa(n)+"]"), field)
 		n = n + 1
 	}
 }
 
 //  Dump all tables of a database
-func dumpdb(w http.ResponseWriter, r *http.Request, parray []string) {
+func dumpTables(w http.ResponseWriter, r *http.Request, parray []string) {
 
 	user, pw, h, p := getCredentials(r)
 	database := parray[0]
@@ -59,14 +57,13 @@ func dumpdb(w http.ResponseWriter, r *http.Request, parray []string) {
 	for rows.Next() {
 		var field string
 		rows.Scan(&field)
-		fmt.Fprint(w, linkDeeper(r.URL.Path, field, "T["+strconv.Itoa(n)+"]"))
-		fmt.Fprintln(w, "  ", field, "<br>")
+		tableDuo(w, href(r.URL.Path, field, "["+strconv.Itoa(n)+"]"), field)
 		n = n + 1
 	}
 }
 
 //  Dump all records of a table, one per line
-func dumptable(w http.ResponseWriter, r *http.Request, parray []string) {
+func dumpRecords(w http.ResponseWriter, r *http.Request, parray []string) {
 
 	user, pw, h, p := getCredentials(r)
 	database := parray[0]
@@ -85,7 +82,15 @@ func dumptable(w http.ResponseWriter, r *http.Request, parray []string) {
 
 	cols, err := rows.Columns()
 	checkY(err)
-	fmt.Fprintln(w, "<p>"+"# "+strings.Join(cols, " ")+"</p>")
+
+	{ // table head
+		fmt.Fprint(w, lineA)
+		tableHead(w, "#")
+		for _, col := range cols {
+			tableHead(w, col)
+		}
+		fmt.Fprint(w, lineO)
+	}
 
 	/*  credits:
 	 * 	http://stackoverflow.com/questions/19991541/dumping-mysql-tables-to-json-with-golang
@@ -102,22 +107,24 @@ func dumptable(w http.ResponseWriter, r *http.Request, parray []string) {
 	var n int = 1
 	for rows.Next() {
 
-		fmt.Fprint(w, linkDeeper(r.URL.Path, strconv.Itoa(n), strconv.Itoa(n)))
+		fmt.Fprint(w, lineA)
+		tableCell(w, href(r.URL.Path, strconv.Itoa(n), strconv.Itoa(n)))
+
 		err = rows.Scan(raw...)
 		checkY(err)
 
 		for _, col := range val {
 			if col != nil {
-				fmt.Fprintf(w, "%s ", string(col.([]byte)))
+				tableCell(w, string(col.([]byte)))
 			}
 		}
-		fmt.Fprintln(w, "<br>")
+		fmt.Fprint(w, lineO)
 		n = n + 1
 	}
 }
 
 // Dump all fields of a record, one column per line
-func dumprecord(w http.ResponseWriter, r *http.Request, parray []string) {
+func dumpFields(w http.ResponseWriter, r *http.Request, parray []string) {
 
 	database := parray[0]
 	table := parray[1]
@@ -156,13 +163,11 @@ rowLoop:
 			err = rows.Scan(raw...)
 			checkY(err)
 
-			fmt.Fprintln(w, "<p>")
 			for i, col := range val {
 				if col != nil {
-					fmt.Fprintln(w, columns[i], ":", string(col.([]byte)), "<br>")
+					tableDuo(w, columns[i], string(col.([]byte)))
 				}
 			}
-			fmt.Fprintln(w, "</p>")
 			break rowLoop
 		}
 		n = n + 1

@@ -1,6 +1,6 @@
 # sqldump
 
-A small tool for assisting in administration of databases. My first 48 hours in Golang.
+A small tool for assisting database administration. My first 48 hours in Golang.
 
 Unfortunately I do not have that much time, so it's just close to the backend with some basic html. 
 Use your fantasy for best UX and choose high levels of abstraction and imagination for fancy output with latest js-technology. 
@@ -18,28 +18,32 @@ Use your fantasy for best UX and choose high levels of abstraction and imaginati
 ## install
 
     export GOPATH=$PWD
-    git clone https://github.com/gophergala/sqldump .
     go get github.com/go-sql-driver/mysql
     go get github.com/gorilla/securecookie
+    go get -u github.com/gophergala/sqldump
 
 ## run
 
-    go run sqldump.go auth.go dump.go aux.go
+    bin/sqldump
+
 
 ## usage
 
 [http://localhost:8080](http://localhost:8080)
 
+or more convenient but not safe
+
+[http://localhost:8080/?user=galagopher&pass=mypassword&host=localhost&port=3306]
+
 ## caveats
 
-- A database named 'favicon.ico' can't be accessed
+- Database named 'favicon.ico' 'login' 'logout' 'help' can't be accessed
+- this stupid design in design has to be changed
 - restriction on names of databases, tables, columns 
-- basic protection against sql injection via URI
+- only basic protection against sql injection
 
 ## perspectives
 
-- output in tables
-- menu line
 - choice for different database drivers
 - insert and edit records
 
