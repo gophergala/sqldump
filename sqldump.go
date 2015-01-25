@@ -41,14 +41,30 @@ func dumpPath(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, tableO)
 	} else if t == "" {
 		fmt.Fprintln(w, db, "</p>")
-		fmt.Fprintln(w, tableA)
+		fmt.Fprint(w, tableA)
 		dumpTables(w, r, db)
-		fmt.Fprintln(w, tableO)
+		fmt.Fprint(w, tableO)
 	} else if x == "" {
-		fmt.Fprintln(w, db+"."+t, "</p>")
-		fmt.Fprintln(w, tableA)
+
+		q := r.URL.Query()
+		q.Add("action", "insert")
+		linkinsert := q.Encode()
+		q.Set("action", "select")
+		linkselect := q.Encode()
+		q.Del("action")
+		q.Del("t")
+		linkescape := q.Encode()
+
+		fmt.Fprint(w, db+"."+t)
+		fmt.Fprint(w, " &nbsp; ")
+		fmt.Fprint(w, " ["+href("?"+linkescape, ".")+"] ")
+		fmt.Fprint(w, " ["+href("?"+linkinsert, "+")+"] ")
+		fmt.Fprint(w, " ["+href("?"+linkselect, "?")+"] ")
+		fmt.Fprintln(w, "</p>")
+
+		fmt.Fprint(w, tableA)
 		dumpRecords(w, r, db, t)
-		fmt.Fprintln(w, tableO)
+		fmt.Fprint(w, tableO)
 	} else {
 
 		xint, err := strconv.Atoi(x)
@@ -66,14 +82,15 @@ func dumpPath(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Fprint(w, db+"."+t)
 		fmt.Fprint(w, " &nbsp; ")
+		fmt.Fprint(w, " ["+href("?"+linkall, ".")+"] ")
 		fmt.Fprint(w, " ["+href("?"+linkleft, "<")+"] ")
 		fmt.Fprint(w, " ["+x+"] ")
 		fmt.Fprint(w, " ["+href("?"+linkright, ">")+"] ")
-		fmt.Fprint(w, " ["+href("?"+linkall, "#")+"] ")
 		fmt.Fprintln(w, "</p>")
-		fmt.Fprintln(w, tableA)
+
+		fmt.Fprint(w, tableA)
 		dumpFields(w, r, db, t, x)
-		fmt.Fprintln(w, tableO)
+		fmt.Fprint(w, tableO)
 	}
 }
 
