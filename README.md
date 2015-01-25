@@ -38,7 +38,7 @@ or more convenient but not safe
 
 ## caveats
 
-- basic protection against sql injection only
+- just basic protection against sql injection via database and table names
 
 ## perspectives
 

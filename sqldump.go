@@ -4,6 +4,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"net/http"
+	"strconv"
 )
 
 var base_url = "http://localhost"
@@ -26,12 +27,13 @@ func helpHandler(w http.ResponseWriter, r *http.Request) {
 
 // here is the workload
 
+
 func dumpPath(w http.ResponseWriter, r *http.Request) {
 
 	v := r.URL.Query()
 	db := v.Get("db")
 	t := v.Get("t")
-	n := v.Get("n")
+	x := v.Get("x")
 
 	if db == "" {
 		fmt.Fprintln(w, "</p>")
@@ -43,15 +45,33 @@ func dumpPath(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, tableA)
 		dumpTables(w, r, db)
 		fmt.Fprintln(w, tableO)
-	} else if n == "" {
+	} else if x == "" {
 		fmt.Fprintln(w, db+"."+t, "</p>")
 		fmt.Fprintln(w, tableA)
 		dumpRecords(w, r, db, t)
 		fmt.Fprintln(w, tableO)
 	} else {
-		fmt.Fprintln(w, db+"."+t, "["+n+"]</p>")
+
+		xint, err  := strconv.Atoi(x)
+		checkY(err)
+		left  := strconv.Itoa (maxI ( xint -1 , 1))
+		right := strconv.Itoa (xint +1) 
+
+		q := r.URL.Query()
+		q.Set("x", left)
+		linkleft := q.Encode()
+
+		q.Set("x", right)
+		linkright := q.Encode()
+
+		fmt.Fprint(w, db+"."+t)
+		fmt.Fprint(w, " &nbsp; ")
+		fmt.Fprint(w, " [" + href("?" + linkleft,"<")   +"] ")
+		fmt.Fprint(w, " [" + x                     +"] ")
+		fmt.Fprint(w, " [" + href("?" + linkright,">") +"] ")
+		fmt.Fprintln(w, "</p>")
 		fmt.Fprintln(w, tableA)
-		dumpFields(w, r, db, t, n)
+		dumpFields(w, r, db, t, x)
 		fmt.Fprintln(w, tableO)
 	}
 }
