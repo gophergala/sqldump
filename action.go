@@ -69,3 +69,28 @@ func actionSelect(w http.ResponseWriter, r *http.Request, database string, table
 func actionInsert(w http.ResponseWriter, r *http.Request, database string, table string) {
 	shipForm(w, r, database, table, "insert", "Insert")
 }
+
+func insertHandler(w http.ResponseWriter, r *http.Request) {
+	db := r.FormValue("db")
+	t := r.FormValue("t")
+
+	rows := getRows(r, db, "select * from "+template.HTMLEscapeString(t))
+	defer rows.Close()
+
+	cols, err := rows.Columns()
+	checkY(err)
+
+	// no time left for submission
+	
+	sql := "insert into " + t + " set\n"
+
+	for _, col := range cols {
+		val := r.FormValue(col)
+		if val != "" {
+			sql = sql + "  " + col + "= \"" + val + "\",\n"
+		}
+	}
+	fmt.Fprintln(w, sql)
+
+//    http.Redirect(w, r, r.URL.Host + "?db=" + db + "&t=" + t, 302)
+}
