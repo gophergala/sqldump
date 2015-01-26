@@ -81,7 +81,7 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 	checkY(err)
 
 	// no time left for submission
-	
+
 	sql := "insert into " + t + " set\n"
 
 	for _, col := range cols {
@@ -92,5 +92,5 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprintln(w, sql)
 
-//    http.Redirect(w, r, r.URL.Host + "?db=" + db + "&t=" + t, 302)
+	//    http.Redirect(w, r, r.URL.Host + "?db=" + db + "&t=" + t, 302)
 }
